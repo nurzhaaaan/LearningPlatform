@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Learning Management System{% endblock %}</title>
+    <title>{% block title %}TestPrep Academy{% endblock %}</title>
     <!-- Bootstrap CSS (Replit theme) -->
     <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
     <!-- Font Awesome for icons -->
@@ -17,7 +17,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
         <div class="container-fluid">
             <a class="navbar-brand" href="{{ url_for('courses.index') }}">
-                <i class="fas fa-graduation-cap me-2"></i>LMS
+                <i class="fas fa-graduation-cap me-2"></i>TestPrep Academy
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -36,11 +36,19 @@
                             <i class="fas fa-info-circle me-1"></i> About Us
                         </a>
                     </li>
-                    <!-- All Courses link always visible -->
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('courses.index') }}">
-                            <i class="fas fa-book me-1"></i> All Courses
+                    <!-- Exam Preparation Categories -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-book me-1"></i> Exam Preparation
                         </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ url_for('courses.index') }}?exam=ielts">IELTS Prep</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('courses.index') }}?exam=sat">SAT Prep</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('courses.index') }}?exam=nuet">NUET Prep</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('courses.index') }}?exam=uto">UTO Prep</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('courses.index') }}">All Courses</a></li>
+                        </ul>
                     </li>
                     {% if current_user.is_authenticated %}
                         <!-- Enrolled Courses link for authenticated users -->
@@ -123,35 +131,34 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-6">
-                    <h5>Learning Management System</h5>
-                    <p>A complete solution for educational institutions.</p>
+                    <h5>TestPrep Academy</h5>
+                    <p>Your premier platform for IELTS, SAT, NUET, and UTO exam preparation.</p>
                 </div>
                 <div class="col-md-3">
                     <h5>Quick Links</h5>
                     <ul class="list-unstyled">
                         <li><a href="{{ url_for('auth.index') }}" class="text-white">Home</a></li>
                         <li><a href="{{ url_for('auth.about') }}" class="text-white">About Us</a></li>
-                        <li><a href="{{ url_for('courses.index') }}" class="text-white">All Courses</a></li>
+                        <li><a href="{{ url_for('courses.index') }}?exam=ielts" class="text-white">IELTS Prep</a></li>
+                        <li><a href="{{ url_for('courses.index') }}?exam=sat" class="text-white">SAT Prep</a></li>
                         {% if current_user.is_authenticated %}
                             <li><a href="{{ url_for('courses.enrolled') }}" class="text-white">My Learning</a></li>
-                            <li><a href="{{ url_for('profile.view_profile') }}" class="text-white">Profile</a></li>
                         {% else %}
                             <li><a href="{{ url_for('auth.login') }}" class="text-white">Login</a></li>
-                            <li><a href="{{ url_for('auth.register') }}" class="text-white">Register</a></li>
                         {% endif %}
                     </ul>
                 </div>
                 <div class="col-md-3">
                     <h5>Contact</h5>
                     <ul class="list-unstyled">
-                        <li><i class="fas fa-envelope me-2"></i> support@lms.edu</li>
+                        <li><i class="fas fa-envelope me-2"></i> support@testprep.edu</li>
                         <li><i class="fas fa-phone me-2"></i> +1 234 567 8900</li>
                     </ul>
                 </div>
             </div>
             <hr class="my-3">
             <div class="text-center">
-                <p class="mb-0">&copy; {{ current_year }} Learning Management System. All rights reserved.</p>
+                <p class="mb-0">&copy; {{ current_year }} TestPrep Academy. All rights reserved.</p>
             </div>
         </div>
     </footer>

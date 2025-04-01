@@ -1,17 +1,17 @@
 {% extends "layout.html" %}
 
-{% block title %}Welcome to LMS{% endblock %}
+{% block title %}Welcome to TestPrep Academy{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center mb-5">
     <div class="col-md-10">
         <div class="text-center p-5 bg-dark rounded-3 shadow">
-            <h1 class="display-4 fw-bold text-white">Welcome to the Learning Management System</h1>
-            <p class="fs-4 text-light">A comprehensive platform for teaching and learning.</p>
+            <h1 class="display-4 fw-bold text-white">TestPrep Academy</h1>
+            <p class="fs-4 text-light">Your premier platform for IELTS, SAT, NUET, and UTO exam preparation</p>
             <hr class="my-4">
             {% if current_user.is_authenticated %}
                 <a href="{{ url_for('courses.index') }}" class="btn btn-primary btn-lg px-4 me-md-2">
-                    <i class="fas fa-book me-2"></i> Browse Courses
+                    <i class="fas fa-book me-2"></i> Browse Test Prep Courses
                 </a>
             {% else %}
                 <a href="{{ url_for('auth.login') }}" class="btn btn-primary btn-lg px-4 me-md-2">
@@ -26,36 +26,47 @@
 </div>
 
 <div class="row mb-5">
-    <div class="col-md-4">
+    <div class="col-md-3">
         <div class="card h-100 bg-dark text-white">
             <div class="card-body">
                 <div class="text-center mb-3">
-                    <i class="fas fa-chalkboard-teacher fa-3x"></i>
+                    <i class="fas fa-language fa-3x"></i>
                 </div>
-                <h3 class="card-title text-center">For Teachers</h3>
-                <p class="card-text">Create engaging courses, manage materials, and track student progress. Our platform makes it easy to deliver quality education.</p>
+                <h3 class="card-title text-center">IELTS Prep</h3>
+                <p class="card-text">Comprehensive preparation for all four IELTS test modules: Listening, Reading, Writing, and Speaking.</p>
             </div>
         </div>
     </div>
-    <div class="col-md-4">
+    <div class="col-md-3">
         <div class="card h-100 bg-dark text-white">
             <div class="card-body">
                 <div class="text-center mb-3">
-                    <i class="fas fa-user-graduate fa-3x"></i>
+                    <i class="fas fa-calculator fa-3x"></i>
                 </div>
-                <h3 class="card-title text-center">For Students</h3>
-                <p class="card-text">Access course materials, submit assignments, and track your progress. Learning has never been more accessible and convenient.</p>
+                <h3 class="card-title text-center">SAT Prep</h3>
+                <p class="card-text">Expert strategies and practice for SAT Math, Evidence-Based Reading and Writing sections.</p>
             </div>
         </div>
     </div>
-    <div class="col-md-4">
+    <div class="col-md-3">
         <div class="card h-100 bg-dark text-white">
             <div class="card-body">
                 <div class="text-center mb-3">
-                    <i class="fas fa-university fa-3x"></i>
+                    <i class="fas fa-graduation-cap fa-3x"></i>
                 </div>
-                <h3 class="card-title text-center">For Institutions</h3>
-                <p class="card-text">Manage your entire educational program from a single platform. Monitor progress, ensure quality, and achieve your institutional goals.</p>
+                <h3 class="card-title text-center">NUET Prep</h3>
+                <p class="card-text">Tailored preparation courses for National University Entrance Test for high school graduates.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card h-100 bg-dark text-white">
+            <div class="card-body">
+                <div class="text-center mb-3">
+                    <i class="fas fa-pen-fancy fa-3x"></i>
+                </div>
+                <h3 class="card-title text-center">UTO Prep</h3>
+                <p class="card-text">Specialized preparation for the Unified Testing of Olympiad participants with expert guidance.</p>
             </div>
         </div>
     </div>
@@ -65,34 +76,34 @@
     <div class="col-12">
         <div class="card bg-dark text-white">
             <div class="card-body">
-                <h2 class="card-title text-center mb-4">Features</h2>
+                <h2 class="card-title text-center mb-4">Why Choose Us</h2>
                 <div class="row g-4">
                     <div class="col-md-6 col-lg-3">
                         <div class="text-center">
-                            <i class="fas fa-tasks fa-2x mb-3"></i>
-                            <h5>Course Management</h5>
-                            <p>Create, organize, and manage courses with ease</p>
+                            <i class="fas fa-chalkboard-teacher fa-2x mb-3"></i>
+                            <h5>Expert Instructors</h5>
+                            <p>Learn from experienced teachers who specialize in test preparation</p>
                         </div>
                     </div>
                     <div class="col-md-6 col-lg-3">
                         <div class="text-center">
                             <i class="fas fa-file-alt fa-2x mb-3"></i>
-                            <h5>Content Library</h5>
-                            <p>Store and share educational materials</p>
+                            <h5>Comprehensive Materials</h5>
+                            <p>Access up-to-date study guides and practice tests</p>
                         </div>
                     </div>
                     <div class="col-md-6 col-lg-3">
                         <div class="text-center">
                             <i class="fas fa-clipboard-check fa-2x mb-3"></i>
-                            <h5>Assessments</h5>
-                            <p>Create quizzes and assignments for students</p>
+                            <h5>Mock Exams</h5>
+                            <p>Prepare with realistic exam simulations and detailed feedback</p>
                         </div>
                     </div>
                     <div class="col-md-6 col-lg-3">
                         <div class="text-center">
                             <i class="fas fa-chart-line fa-2x mb-3"></i>
                             <h5>Progress Tracking</h5>
-                            <p>Monitor student performance and improvement</p>
+                            <p>Monitor your improvement with detailed analytics</p>
                         </div>
                     </div>
                 </div>
@@ -105,10 +116,10 @@
     <div class="col-12">
         <div class="card bg-primary text-white">
             <div class="card-body text-center p-4">
-                <h2 class="card-title">Ready to start learning?</h2>
-                <p class="card-text fs-5">Join our learning platform today and unlock your full potential.</p>
+                <h2 class="card-title">Ready to Ace Your Exams?</h2>
+                <p class="card-text fs-5">Join our test prep academy today and get on the path to success.</p>
                 {% if current_user.is_authenticated %}
-                    <a href="{{ url_for('courses.index') }}" class="btn btn-light btn-lg">Browse Courses</a>
+                    <a href="{{ url_for('courses.index') }}" class="btn btn-light btn-lg">Browse Test Prep Courses</a>
                 {% else %}
                     <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg">Get Started</a>
                 {% endif %}
