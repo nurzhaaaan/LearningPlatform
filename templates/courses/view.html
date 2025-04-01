@@ -47,7 +47,7 @@
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                             <form action="{{ url_for('courses.delete', course_id=course.id) }}" method="POST">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
                                 <button type="submit" class="btn btn-danger">Delete Course</button>
                             </form>
                         </div>
@@ -57,14 +57,12 @@
         {% elif current_user.is_student() %}
             {% if is_enrolled %}
                 <form action="{{ url_for('courses.unenroll', course_id=course.id) }}" method="POST">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <button type="submit" class="btn btn-outline-danger" data-confirm="Are you sure you want to unenroll from this course?">
                         <i class="fas fa-user-minus me-1"></i> Unenroll
                     </button>
                 </form>
             {% else %}
                 <form action="{{ url_for('courses.enroll', course_id=course.id) }}" method="POST">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <button type="submit" class="btn btn-success">
                         <i class="fas fa-user-plus me-1"></i> Enroll
                     </button>
