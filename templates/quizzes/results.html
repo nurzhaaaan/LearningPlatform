@@ -1,0 +1,177 @@
+{% extends "layout.html" %}
+
+{% block title %}Quiz Results - LMS{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2 class="display-6"><i class="fas fa-poll me-2"></i>Quiz Results</h2>
+        <p class="lead">{{ quiz.title }} - {{ course.title }}</p>
+    </div>
+    <div class="col-md-4 text-md-end">
+        {% if current_user.id == student.id %}
+            <a href="{{ url_for('quizzes.view', quiz_id=quiz.id) }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Back to Quiz
+            </a>
+        {% else %}
+            <a href="{{ url_for('quizzes.view', quiz_id=quiz.id) }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Back to Quiz
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Result Summary</h5>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    {% if attempt.score >= 90 %}
+                        <div class="display-1 text-success mb-3">{{ attempt.score }}%</div>
+                        <h4 class="text-success">Excellent!</h4>
+                    {% elif attempt.score >= 70 %}
+                        <div class="display-1 text-primary mb-3">{{ attempt.score }}%</div>
+                        <h4 class="text-primary">Good job!</h4>
+                    {% elif attempt.score >= 50 %}
+                        <div class="display-1 text-warning mb-3">{{ attempt.score }}%</div>
+                        <h4 class="text-warning">Nice effort!</h4>
+                    {% else %}
+                        <div class="display-1 text-danger mb-3">{{ attempt.score }}%</div>
+                        <h4 class="text-danger">Need improvement</h4>
+                    {% endif %}
+                </div>
+                
+                <div class="row text-center mb-4">
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h5 class="card-title">Started</h5>
+                                <p class="card-text">{{ attempt.started_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h5 class="card-title">Completed</h5>
+                                <p class="card-text">{{ attempt.completed_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h5 class="card-title">Time Taken</h5>
+                                {% set duration = (attempt.completed_at - attempt.started_at).total_seconds() // 60 %}
+                                <p class="card-text">{{ duration }} minutes</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <h5>Detailed Results</h5>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Question</th>
+                                <th>Your Answer</th>
+                                <th>Correct Answer</th>
+                                <th>Result</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for result in results %}
+                                <tr>
+                                    <td>{{ result.question_text }}</td>
+                                    <td>{{ result.selected_text }}</td>
+                                    <td>{{ result.correct_text }}</td>
+                                    <td>
+                                        {% if result.is_correct %}
+                                            <span class="badge bg-success">Correct</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Incorrect</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="fas fa-user me-2"></i>Student Information</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Name:</strong> {{ student.first_name }} {{ student.last_name }}</p>
+                <p><strong>Email:</strong> {{ student.email }}</p>
+                <p><strong>Username:</strong> {{ student.username }}</p>
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Quiz Information</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>Title</span>
+                        <strong>{{ quiz.title }}</strong>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>Time Limit</span>
+                        <strong>{{ quiz.time_limit }} minutes</strong>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>Course</span>
+                        <strong>{{ course.title }}</strong>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>Score</span>
+                        <strong class="text-{{ 'success' if attempt.score >= 70 else 'danger' }}">{{ attempt.score }}%</strong>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        {% if current_user.is_teacher() or current_user.is_admin() %}
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="fas fa-arrow-circle-right me-2"></i>Next Steps</h5>
+                </div>
+                <div class="card-body">
+                    <a href="{{ url_for('quizzes.view', quiz_id=quiz.id) }}" class="btn btn-primary w-100 mb-2">
+                        <i class="fas fa-users me-1"></i> View All Attempts
+                    </a>
+                    <a href="{{ url_for('courses.view', course_id=course.id) }}" class="btn btn-secondary w-100">
+                        <i class="fas fa-book me-1"></i> Back to Course
+                    </a>
+                </div>
+            </div>
+        {% else %}
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="fas fa-arrow-circle-right me-2"></i>Next Steps</h5>
+                </div>
+                <div class="card-body">
+                    <a href="{{ url_for('courses.view', course_id=course.id) }}" class="btn btn-primary w-100 mb-2">
+                        <i class="fas fa-book me-1"></i> Continue Learning
+                    </a>
+                    <a href="{{ url_for('quizzes.view', quiz_id=quiz.id) }}" class="btn btn-secondary w-100">
+                        <i class="fas fa-redo me-1"></i> View Quiz Details
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

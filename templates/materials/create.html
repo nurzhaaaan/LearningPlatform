@@ -1,0 +1,103 @@
+{% extends "layout.html" %}
+
+{% block title %}{% if edit_mode %}Edit{% else %}Add{% endif %} Material - LMS{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2 class="display-6">
+            <i class="fas fa-{% if edit_mode %}edit{% else %}plus{% endif %} me-2"></i>
+            {% if edit_mode %}Edit{% else %}Add{% endif %} Course Material
+        </h2>
+        <p class="lead">{{ course.title }} ({{ course.code }})</p>
+    </div>
+    <div class="col-md-4 text-md-end">
+        {% if edit_mode %}
+            <a href="{{ url_for('materials.view', material_id=material.id) }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Back to Material
+            </a>
+        {% else %}
+            <a href="{{ url_for('courses.view', course_id=course.id) }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Back to Course
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Material Details</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ edit_mode and url_for('materials.edit', material_id=material.id) or url_for('materials.create', course_id=course.id) }}">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Title</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-heading"></i></span>
+                            {{ form.title(class="form-control", placeholder="Enter material title", id="title") }}
+                        </div>
+                        {% if form.title.errors %}
+                            <div class="text-danger">
+                                {% for error in form.title.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="content" class="form-label">Content</label>
+                        <small class="text-muted d-block mb-2">You can use Markdown formatting for rich text</small>
+                        {{ form.content(class="form-control", rows="15", placeholder="Enter material content", id="content") }}
+                        {% if form.content.errors %}
+                            <div class="text-danger">
+                                {% for error in form.content.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="file_url" class="form-label">File URL (Optional)</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-link"></i></span>
+                            {{ form.file_url(class="form-control", placeholder="Enter URL to external file if applicable", id="file_url") }}
+                        </div>
+                        <small class="text-muted">Provide a URL to an external resource or file if needed</small>
+                        {% if form.file_url.errors %}
+                            <div class="text-danger">
+                                {% for error in form.file_url.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        {% if edit_mode %}
+                            <a href="{{ url_for('materials.view', material_id=material.id) }}" class="btn btn-secondary">
+                                <i class="fas fa-times me-1"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i> Update Material
+                            </button>
+                        {% else %}
+                            <a href="{{ url_for('courses.view', course_id=course.id) }}" class="btn btn-secondary">
+                                <i class="fas fa-times me-1"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-plus me-1"></i> Add Material
+                            </button>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,117 @@
+{% extends "layout.html" %}
+
+{% block title %}{% if edit_mode %}Edit{% else %}Create{% endif %} Assignment - LMS{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2 class="display-6">
+            <i class="fas fa-{% if edit_mode %}edit{% else %}plus{% endif %} me-2"></i>
+            {% if edit_mode %}Edit{% else %}Create{% endif %} Assignment
+        </h2>
+        <p class="lead">{{ course.title }} ({{ course.code }})</p>
+    </div>
+    <div class="col-md-4 text-md-end">
+        {% if edit_mode %}
+            <a href="{{ url_for('assignments.view', assignment_id=assignment.id) }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Back to Assignment
+            </a>
+        {% else %}
+            <a href="{{ url_for('courses.view', course_id=course.id) }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Back to Course
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Assignment Details</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ edit_mode and url_for('assignments.edit', assignment_id=assignment.id) or url_for('assignments.create', course_id=course.id) }}">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Title</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-heading"></i></span>
+                            {{ form.title(class="form-control", placeholder="Enter assignment title", id="title") }}
+                        </div>
+                        {% if form.title.errors %}
+                            <div class="text-danger">
+                                {% for error in form.title.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description/Instructions</label>
+                        {{ form.description(class="form-control", rows="8", placeholder="Enter assignment instructions", id="description") }}
+                        {% if form.description.errors %}
+                            <div class="text-danger">
+                                {% for error in form.description.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="due_date" class="form-label">Due Date</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                                {{ form.due_date(class="form-control", type="datetime-local", id="due_date") }}
+                            </div>
+                            {% if form.due_date.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.due_date.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="points" class="form-label">Points</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-star"></i></span>
+                                {{ form.points(class="form-control", id="points") }}
+                            </div>
+                            {% if form.points.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.points.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        {% if edit_mode %}
+                            <a href="{{ url_for('assignments.view', assignment_id=assignment.id) }}" class="btn btn-secondary">
+                                <i class="fas fa-times me-1"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i> Update Assignment
+                            </button>
+                        {% else %}
+                            <a href="{{ url_for('courses.view', course_id=course.id) }}" class="btn btn-secondary">
+                                <i class="fas fa-times me-1"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-plus me-1"></i> Create Assignment
+                            </button>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

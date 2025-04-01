@@ -1,0 +1,113 @@
+{% extends "layout.html" %}
+
+{% block title %}{% if edit_mode %}Edit{% else %}Create{% endif %} Quiz - LMS{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2 class="display-6">
+            <i class="fas fa-{% if edit_mode %}edit{% else %}plus{% endif %} me-2"></i>
+            {% if edit_mode %}Edit{% else %}Create{% endif %} Quiz
+        </h2>
+        <p class="lead">{{ course.title }} ({{ course.code }})</p>
+    </div>
+    <div class="col-md-4 text-md-end">
+        {% if edit_mode %}
+            <a href="{{ url_for('quizzes.view', quiz_id=quiz.id) }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Back to Quiz
+            </a>
+        {% else %}
+            <a href="{{ url_for('courses.view', course_id=course.id) }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Back to Course
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Quiz Details</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ edit_mode and url_for('quizzes.edit', quiz_id=quiz.id) or url_for('quizzes.create', course_id=course.id) }}">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Quiz Title</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-heading"></i></span>
+                            {{ form.title(class="form-control", placeholder="Enter quiz title", id="title") }}
+                        </div>
+                        {% if form.title.errors %}
+                            <div class="text-danger">
+                                {% for error in form.title.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        {{ form.description(class="form-control", rows="5", placeholder="Enter quiz description and instructions", id="description") }}
+                        {% if form.description.errors %}
+                            <div class="text-danger">
+                                {% for error in form.description.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="time_limit" class="form-label">Time Limit (minutes)</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-clock"></i></span>
+                                {{ form.time_limit(class="form-control", id="time_limit") }}
+                            </div>
+                            {% if form.time_limit.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.time_limit.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mt-4">
+                                <div class="form-check">
+                                    {{ form.is_active(class="form-check-input", id="is_active") }}
+                                    <label class="form-check-label" for="is_active">
+                                        Active (quiz is visible to students)
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        {% if edit_mode %}
+                            <a href="{{ url_for('quizzes.view', quiz_id=quiz.id) }}" class="btn btn-secondary">
+                                <i class="fas fa-times me-1"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i> Update Quiz
+                            </button>
+                        {% else %}
+                            <a href="{{ url_for('courses.view', course_id=course.id) }}" class="btn btn-secondary">
+                                <i class="fas fa-times me-1"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-plus me-1"></i> Create Quiz
+                            </button>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

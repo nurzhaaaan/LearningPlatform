@@ -1,0 +1,155 @@
+{% extends "layout.html" %}
+
+{% block title %}Grade Assignment - LMS{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2 class="display-6"><i class="fas fa-check-square me-2"></i>Grade Assignment</h2>
+        <p class="lead">{{ assignment.title }} - {{ course.title }}</p>
+    </div>
+    <div class="col-md-4 text-md-end">
+        <a href="{{ url_for('assignments.view', assignment_id=assignment.id) }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Back to Assignment
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Student Submission -->
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-user-graduate me-2"></i>
+                    Submission by {{ student.first_name }} {{ student.last_name }}
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-3">
+                    <span class="badge bg-primary">Assignment: {{ assignment.points }} points</span>
+                    <span class="text-muted">Submitted: {{ submission.submitted_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                </div>
+                
+                <div class="card bg-dark text-white mb-4">
+                    <div class="card-body">
+                        {{ submission.content|safe }}
+                    </div>
+                </div>
+                
+                {% if submission.file_url %}
+                    <div class="mb-4">
+                        <h6>Attached File:</h6>
+                        <a href="{{ submission.file_url }}" target="_blank" class="btn btn-outline-primary">
+                            <i class="fas fa-external-link-alt me-1"></i> View Attached File
+                        </a>
+                    </div>
+                {% endif %}
+                
+                <!-- Grading Form -->
+                <form method="POST" action="{{ url_for('assignments.grade_submission', submission_id=submission.id) }}">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-3">
+                        <label for="grade" class="form-label">Grade (out of {{ assignment.points }} points)</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-star"></i></span>
+                            {{ form.grade(class="form-control", id="grade", min="0", max=assignment.points) }}
+                            <span class="input-group-text">/ {{ assignment.points }}</span>
+                        </div>
+                        {% if form.grade.errors %}
+                            <div class="text-danger">
+                                {% for error in form.grade.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="feedback" class="form-label">Feedback</label>
+                        {{ form.feedback(class="form-control", rows="5", placeholder="Provide feedback to the student", id="feedback") }}
+                        {% if form.feedback.errors %}
+                            <div class="text-danger">
+                                {% for error in form.feedback.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('assignments.view', assignment_id=assignment.id) }}" class="btn btn-secondary">
+                            <i class="fas fa-times me-1"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save me-1"></i> Submit Grade
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Assignment Details and Student Info -->
+    <div class="col-lg-4">
+        <!-- Student Info -->
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="fas fa-user me-2"></i>Student Information</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Name:</strong> {{ student.first_name }} {{ student.last_name }}</p>
+                <p><strong>Email:</strong> {{ student.email }}</p>
+                <p><strong>Username:</strong> {{ student.username }}</p>
+            </div>
+        </div>
+        
+        <!-- Assignment Details -->
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Assignment Information</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Title:</strong> {{ assignment.title }}</p>
+                <p><strong>Due Date:</strong> {{ assignment.due_date.strftime('%Y-%m-%d %H:%M') }}</p>
+                <p><strong>Total Points:</strong> {{ assignment.points }}</p>
+                
+                {% if submission.submitted_at > assignment.due_date %}
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-1"></i>
+                        This submission was received after the due date.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Grading Guide -->
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="fas fa-clipboard-check me-2"></i>Grading Tips</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        Provide specific and constructive feedback
+                    </li>
+                    <li class="list-group-item">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        Highlight strengths and areas for improvement
+                    </li>
+                    <li class="list-group-item">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        Be consistent with grading across all students
+                    </li>
+                    <li class="list-group-item">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        Consider the effort, not just the final result
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

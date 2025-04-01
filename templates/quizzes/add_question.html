@@ -1,0 +1,237 @@
+{% extends "layout.html" %}
+
+{% block title %}Add Question - LMS{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2 class="display-6"><i class="fas fa-plus me-2"></i>Add Question</h2>
+        <p class="lead">{{ quiz.title }} - {{ course.title }}</p>
+    </div>
+    <div class="col-md-4 text-md-end">
+        <a href="{{ url_for('quizzes.view', quiz_id=quiz.id) }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Back to Quiz
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Question Form -->
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-plus-circle me-2"></i>New Question</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('quizzes.add_question', quiz_id=quiz.id) }}">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-3">
+                        <label for="question_text" class="form-label">Question</label>
+                        {{ form.question_text(class="form-control", rows="3", placeholder="Enter your question", id="question_text") }}
+                        {% if form.question_text.errors %}
+                            <div class="text-danger">
+                                {% for error in form.question_text.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="question_type" class="form-label">Question Type</label>
+                            {{ form.question_type(class="form-control", id="question_type") }}
+                            {% if form.question_type.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.question_type.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="points" class="form-label">Points</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-star"></i></span>
+                                {{ form.points(class="form-control", id="points") }}
+                            </div>
+                            {% if form.points.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.points.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Container for Multiple Choice Options -->
+                    <div id="options-container" class="mb-3 d-none">
+                        <label class="form-label">Options</label>
+                        <p class="text-muted small">Add at least 2 options for this question. Mark one as correct.</p>
+                        
+                        <div class="option-row mb-3 row">
+                            <div class="col-md-8">
+                                <input type="text" name="option_text_1" class="form-control" placeholder="Option 1" required>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" type="radio" name="correct_option" value="1" id="option1" checked>
+                                    <label class="form-check-label" for="option1">Correct</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="option-row mb-3 row">
+                            <div class="col-md-8">
+                                <input type="text" name="option_text_2" class="form-control" placeholder="Option 2" required>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" type="radio" name="correct_option" value="2" id="option2">
+                                    <label class="form-check-label" for="option2">Correct</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <input type="hidden" name="option_count" value="2" id="option-count">
+                        
+                        <button type="button" id="add-option-btn" class="btn btn-outline-primary">
+                            <i class="fas fa-plus me-1"></i> Add Option
+                        </button>
+                    </div>
+                    
+                    <!-- Container for True/False Options -->
+                    <div id="true-false-container" class="mb-3 d-none">
+                        <label class="form-label">Correct Answer</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="true_false" value="true" id="true" checked>
+                            <label class="form-check-label" for="true">True</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="true_false" value="false" id="false">
+                            <label class="form-check-label" for="false">False</label>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mt-4">
+                        <div>
+                            <button type="submit" name="add_another" value="1" class="btn btn-primary">
+                                <i class="fas fa-plus me-1"></i> Add & Create Another
+                            </button>
+                            <button type="submit" class="btn btn-success ms-2">
+                                <i class="fas fa-save me-1"></i> Add Question
+                            </button>
+                        </div>
+                        <a href="{{ url_for('quizzes.view', quiz_id=quiz.id) }}" class="btn btn-secondary">
+                            <i class="fas fa-times me-1"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Current Questions -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="fas fa-list me-2"></i>Current Questions</h5>
+            </div>
+            <div class="card-body">
+                {% if questions %}
+                    <div class="list-group">
+                        {% for question in questions %}
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">Question {{ loop.index }}</h6>
+                                    <small class="text-muted">{{ question.question_type|replace('_', ' ')|title }}</small>
+                                </div>
+                                <p class="mb-1">{{ question.question_text|truncate(50) }}</p>
+                                <small class="text-muted">
+                                    {{ question.points }} point{{ 's' if question.points != 1 else '' }}
+                                </small>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-question-circle fa-3x mb-3 text-muted"></i>
+                        <p>No questions added yet.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const questionTypeSelect = document.getElementById('question_type');
+        const optionsContainer = document.getElementById('options-container');
+        const trueFalseContainer = document.getElementById('true-false-container');
+        
+        function updateQuestionType() {
+            if (questionTypeSelect.value === 'multiple_choice') {
+                optionsContainer.classList.remove('d-none');
+                trueFalseContainer.classList.add('d-none');
+            } else if (questionTypeSelect.value === 'true_false') {
+                optionsContainer.classList.add('d-none');
+                trueFalseContainer.classList.remove('d-none');
+            }
+        }
+        
+        // Initial setup
+        updateQuestionType();
+        
+        // Listen for changes
+        questionTypeSelect.addEventListener('change', updateQuestionType);
+        
+        // Add option button
+        const addOptionBtn = document.getElementById('add-option-btn');
+        const optionCountInput = document.getElementById('option-count');
+        
+        addOptionBtn.addEventListener('click', function() {
+            // Get current option count and increment
+            let optionCount = parseInt(optionCountInput.value);
+            optionCount++;
+            
+            // Create new option row
+            const optionRow = document.createElement('div');
+            optionRow.className = 'option-row mb-3 row';
+            
+            optionRow.innerHTML = `
+                <div class="col-md-8">
+                    <input type="text" name="option_text_${optionCount}" class="form-control" placeholder="Option ${optionCount}" required>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-check mt-2">
+                        <input class="form-check-input" type="radio" name="correct_option" value="${optionCount}" id="option${optionCount}">
+                        <label class="form-check-label" for="option${optionCount}">Correct</label>
+                    </div>
+                </div>
+                <div class="col-md-1">
+                    <button type="button" class="btn btn-sm btn-outline-danger remove-option mt-1">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            // Insert before the add button
+            addOptionBtn.parentNode.insertBefore(optionRow, addOptionBtn);
+            
+            // Update the counter
+            optionCountInput.value = optionCount;
+            
+            // Add event listener to remove button
+            optionRow.querySelector('.remove-option').addEventListener('click', function() {
+                optionRow.remove();
+                optionCountInput.value = document.querySelectorAll('.option-row').length;
+            });
+        });
+    });
+</script>
+{% endblock %}

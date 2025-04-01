@@ -1,0 +1,164 @@
+{% extends "layout.html" %}
+
+{% block title %}Taking Quiz - LMS{% endblock %}
+
+{% block content %}
+<!-- Quiz Timer Alert -->
+<div class="alert alert-primary quiz-timer" id="quiz-timer" data-time-limit="{{ quiz.time_limit }}" data-quiz-id="{{ quiz.id }}" data-attempt-id="{{ attempt.id }}">
+    <strong><i class="fas fa-clock me-2"></i>Time Remaining:</strong> <span id="timer-display">{{ quiz.time_limit }}:00</span>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2 class="display-6">{{ quiz.title }}</h2>
+        <p class="lead">{{ course.title }}</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-9">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="fas fa-question-circle me-2"></i>Quiz Questions</h5>
+            </div>
+            <div class="card-body">
+                <form id="quiz-form" method="POST" action="{{ url_for('quizzes.take', quiz_id=quiz.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="attempt_id" value="{{ attempt.id }}">
+                    
+                    {% for question in questions %}
+                        <div class="question-container mb-4 pb-4 border-bottom">
+                            <h5 class="mb-3">
+                                <span class="badge bg-primary me-2">{{ loop.index }}</span>
+                                {{ question.question_text }}
+                                <span class="badge bg-secondary float-end">{{ question.points }} point{{ 's' if question.points != 1 else '' }}</span>
+                            </h5>
+                            
+                            {% if question.question_type == 'multiple_choice' %}
+                                <div class="options-container">
+                                    {% for option in question.options %}
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="radio" name="question_{{ question.id }}" 
+                                                  id="option_{{ option.id }}" value="{{ option.id }}">
+                                            <label class="form-check-label" for="option_{{ option.id }}">
+                                                {{ option.option_text }}
+                                            </label>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% elif question.question_type == 'true_false' %}
+                                <div class="options-container">
+                                    {% for option in question.options %}
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="radio" name="question_{{ question.id }}" 
+                                                  id="option_{{ option.id }}" value="{{ option.id }}">
+                                            <label class="form-check-label" for="option_{{ option.id }}">
+                                                {{ option.option_text }}
+                                            </label>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                    
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Warning:</strong> Once you submit this quiz, you cannot make changes.
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{{ url_for('quizzes.view', quiz_id=quiz.id) }}" class="btn btn-secondary" 
+                           onclick="return confirm('Are you sure you want to exit? Your progress will be saved, but the timer will continue.')">
+                            <i class="fas fa-save me-1"></i> Save & Exit
+                        </a>
+                        <button type="submit" class="btn btn-success" onclick="return confirm('Are you sure you want to submit your quiz? This action cannot be undone.')">
+                            <i class="fas fa-paper-plane me-1"></i> Submit Quiz
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3">
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Quiz Information</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>Time Limit</span>
+                        <strong>{{ quiz.time_limit }} minutes</strong>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>Questions</span>
+                        <strong>{{ questions|length }}</strong>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="fas fa-lightbulb me-2"></i>Tips</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        Read each question carefully
+                    </li>
+                    <li class="list-group-item">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        Answer all questions
+                    </li>
+                    <li class="list-group-item">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        Manage your time wisely
+                    </li>
+                    <li class="list-group-item">
+                        <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                        Your answers are saved automatically
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Quiz timer functionality
+        const quizTimerElement = document.getElementById('quiz-timer');
+        const timerDisplay = document.getElementById('timer-display');
+        
+        if (quizTimerElement) {
+            let timeLeft = parseInt(quizTimerElement.dataset.timeLimit) * 60; // Convert to seconds
+            
+            const timerInterval = setInterval(function() {
+                timeLeft--;
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                
+                timerDisplay.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                
+                if (timeLeft <= 300) { // 5 minutes left
+                    quizTimerElement.classList.remove('alert-primary');
+                    quizTimerElement.classList.add('alert-danger');
+                    timerDisplay.classList.add('fw-bold');
+                }
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    alert('Time is up! Your quiz is being submitted automatically.');
+                    document.getElementById('quiz-form').submit();
+                }
+            }, 1000);
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,271 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ quiz.title }} - LMS{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2 class="display-6">{{ quiz.title }}</h2>
+        <p class="lead">
+            <a href="{{ url_for('courses.view', course_id=course.id) }}">{{ course.title }}</a>
+        </p>
+    </div>
+    <div class="col-md-4 text-md-end">
+        {% if current_user.id == course.teacher_id or current_user.is_admin() %}
+            <div class="btn-group">
+                <a href="{{ url_for('quizzes.add_question', quiz_id=quiz.id) }}" class="btn btn-success">
+                    <i class="fas fa-plus me-1"></i> Add Questions
+                </a>
+                <a href="{{ url_for('quizzes.edit', quiz_id=quiz.id) }}" class="btn btn-primary">
+                    <i class="fas fa-edit me-1"></i> Edit
+                </a>
+                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteQuizModal">
+                    <i class="fas fa-trash me-1"></i> Delete
+                </button>
+            </div>
+            
+            <!-- Delete Quiz Modal -->
+            <div class="modal fade" id="deleteQuizModal" tabindex="-1" aria-labelledby="deleteQuizModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="deleteQuizModalLabel">Confirm Deletion</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Are you sure you want to delete the quiz <strong>{{ quiz.title }}</strong>?</p>
+                            <p class="text-danger">This action cannot be undone. All questions, options, and student attempts will be permanently deleted.</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <form action="{{ url_for('quizzes.delete', quiz_id=quiz.id) }}" method="POST">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn btn-danger">Delete Quiz</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% elif current_user.is_student() %}
+            <a href="{{ url_for('quizzes.take', quiz_id=quiz.id) }}" class="btn btn-success">
+                <i class="fas fa-play me-1"></i> Take Quiz
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row">
+    <!-- Quiz Details -->
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Quiz Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between mb-3">
+                        <div>
+                            <span class="badge bg-primary me-2">{{ quiz.time_limit }} minutes</span>
+                            {% if quiz.is_active %}
+                                <span class="badge bg-success">Active</span>
+                            {% else %}
+                                <span class="badge bg-danger">Inactive</span>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <strong>Created:</strong> {{ quiz.created_at.strftime('%Y-%m-%d') }}
+                        </div>
+                    </div>
+                    
+                    <h5>Description</h5>
+                    <div class="material-content">
+                        {{ quiz.description|safe }}
+                    </div>
+                </div>
+                
+                {% if is_teacher %}
+                    <!-- Questions (visible to teachers) -->
+                    <div class="mt-4 pt-3 border-top">
+                        <h5><i class="fas fa-question-circle me-2"></i>Questions</h5>
+                        
+                        {% if questions %}
+                            <div class="accordion" id="questionsAccordion">
+                                {% for question in questions %}
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header" id="heading{{ question.id }}">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                                                    data-bs-target="#collapse{{ question.id }}" aria-expanded="false" 
+                                                    aria-controls="collapse{{ question.id }}">
+                                                <div class="d-flex justify-content-between w-100 me-3">
+                                                    <span>{{ question.question_text|truncate(50) }}</span>
+                                                    <span class="badge bg-primary">{{ question.points }} pts</span>
+                                                </div>
+                                            </button>
+                                        </h2>
+                                        <div id="collapse{{ question.id }}" class="accordion-collapse collapse" 
+                                             aria-labelledby="heading{{ question.id }}" data-bs-parent="#questionsAccordion">
+                                            <div class="accordion-body">
+                                                <p><strong>Question:</strong> {{ question.question_text }}</p>
+                                                <p><strong>Type:</strong> {{ question.question_type|replace('_', ' ')|title }}</p>
+                                                
+                                                <div class="mt-2">
+                                                    <strong>Options:</strong>
+                                                    <ul class="list-group">
+                                                        {% for option in question.options %}
+                                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                                {{ option.option_text }}
+                                                                {% if option.is_correct %}
+                                                                    <span class="badge bg-success">Correct</span>
+                                                                {% endif %}
+                                                            </li>
+                                                        {% endfor %}
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                No questions have been added to this quiz yet.
+                                <div class="mt-2">
+                                    <a href="{{ url_for('quizzes.add_question', quiz_id=quiz.id) }}" class="btn btn-sm btn-primary">
+                                        <i class="fas fa-plus me-1"></i> Add Questions
+                                    </a>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        {% if is_teacher %}
+            <!-- Student Attempts (visible to teachers) -->
+            <div class="card mb-4">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="fas fa-users me-2"></i>Student Attempts</h5>
+                </div>
+                <div class="card-body">
+                    {% if attempts %}
+                        <div class="list-group">
+                            {% for attempt in attempts %}
+                                <div class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">{{ attempt.student_name }}</h6>
+                                        <small>{{ attempt.started_at.strftime('%Y-%m-%d') }}</small>
+                                    </div>
+                                    <p class="mb-1">
+                                        {% if attempt.is_completed %}
+                                            <span class="badge bg-success">Completed: {{ attempt.score }}%</span>
+                                        {% else %}
+                                            <span class="badge bg-warning">In Progress</span>
+                                        {% endif %}
+                                    </p>
+                                    {% if attempt.is_completed %}
+                                        <div class="mt-2">
+                                            <a href="{{ url_for('quizzes.results', attempt_id=attempt.id) }}" class="btn btn-sm btn-primary">
+                                                <i class="fas fa-eye me-1"></i> View Results
+                                            </a>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-users-slash fa-3x mb-3 text-muted"></i>
+                            <p>No students have attempted this quiz yet.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% else %}
+            <!-- Student's Previous Attempts -->
+            <div class="card mb-4">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="fas fa-history me-2"></i>Your Attempts</h5>
+                </div>
+                <div class="card-body">
+                    {% if attempts %}
+                        <div class="list-group">
+                            {% for attempt in attempts %}
+                                <div class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">Attempt #{{ loop.revindex }}</h6>
+                                        <small>{{ attempt.started_at.strftime('%Y-%m-%d') }}</small>
+                                    </div>
+                                    
+                                    {% if attempt.completed_at %}
+                                        <div class="mb-2">
+                                            <span class="badge bg-success">Completed</span>
+                                            <span class="badge bg-primary">Score: {{ attempt.score }}%</span>
+                                        </div>
+                                        <a href="{{ url_for('quizzes.results', attempt_id=attempt.id) }}" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-eye me-1"></i> View Results
+                                        </a>
+                                    {% else %}
+                                        <div class="mb-2">
+                                            <span class="badge bg-warning">In Progress</span>
+                                        </div>
+                                        <a href="{{ url_for('quizzes.take', quiz_id=quiz.id) }}" class="btn btn-sm btn-warning">
+                                            <i class="fas fa-play me-1"></i> Resume Quiz
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-file-alt fa-3x mb-3 text-muted"></i>
+                            <p>You haven't attempted this quiz yet.</p>
+                            <a href="{{ url_for('quizzes.take', quiz_id=quiz.id) }}" class="btn btn-success">
+                                <i class="fas fa-play me-1"></i> Take Quiz
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+        
+        <!-- Quiz Details -->
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="fas fa-cog me-2"></i>Quiz Details</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span><i class="fas fa-clock me-2"></i>Time Limit</span>
+                        <strong>{{ quiz.time_limit }} minutes</strong>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span><i class="fas fa-question-circle me-2"></i>Questions</span>
+                        <strong>{{ questions|length if questions else 0 }}</strong>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span><i class="fas fa-calendar-alt me-2"></i>Created</span>
+                        <strong>{{ quiz.created_at.strftime('%Y-%m-%d') }}</strong>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span><i class="fas fa-users me-2"></i>Attempts</span>
+                        <strong>{{ attempts|length if attempts else 0 }}</strong>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span><i class="fas fa-toggle-on me-2"></i>Status</span>
+                        {% if quiz.is_active %}
+                            <span class="badge bg-success">Active</span>
+                        {% else %}
+                            <span class="badge bg-danger">Inactive</span>
+                        {% endif %}
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

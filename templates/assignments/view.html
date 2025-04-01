@@ -1,0 +1,214 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ assignment.title }} - LMS{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2 class="display-6">{{ assignment.title }}</h2>
+        <p class="lead">
+            <a href="{{ url_for('courses.view', course_id=course.id) }}">{{ course.title }}</a>
+        </p>
+    </div>
+    <div class="col-md-4 text-md-end">
+        {% if current_user.id == course.teacher_id or current_user.is_admin() %}
+            <div class="btn-group">
+                <a href="{{ url_for('assignments.edit', assignment_id=assignment.id) }}" class="btn btn-primary">
+                    <i class="fas fa-edit me-1"></i> Edit
+                </a>
+                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteAssignmentModal">
+                    <i class="fas fa-trash me-1"></i> Delete
+                </button>
+            </div>
+            
+            <!-- Delete Assignment Modal -->
+            <div class="modal fade" id="deleteAssignmentModal" tabindex="-1" aria-labelledby="deleteAssignmentModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="deleteAssignmentModalLabel">Confirm Deletion</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Are you sure you want to delete the assignment <strong>{{ assignment.title }}</strong>?</p>
+                            <p class="text-danger">This action cannot be undone. All submissions will be permanently deleted.</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <form action="{{ url_for('assignments.delete', assignment_id=assignment.id) }}" method="POST">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn btn-danger">Delete Assignment</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% elif current_user.is_student() and not submission and not is_past_due %}
+            <a href="{{ url_for('assignments.submit', assignment_id=assignment.id) }}" class="btn btn-success">
+                <i class="fas fa-paper-plane me-1"></i> Submit Assignment
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row">
+    <!-- Assignment Details -->
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="fas fa-clipboard-list me-2"></i>Assignment Details</h5>
+            </div>
+            <div class="card-body">
+                <!-- Assignment Info -->
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between mb-3">
+                        <div>
+                            <span class="badge bg-primary me-2">{{ assignment.points }} points</span>
+                            {% if assignment.due_date < now() %}
+                                <span class="badge bg-danger">Past Due</span>
+                            {% else %}
+                                <span class="badge bg-success">Open</span>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <strong>Due:</strong> {{ assignment.due_date.strftime('%Y-%m-%d %H:%M') }}
+                        </div>
+                    </div>
+                    
+                    <div class="material-content">
+                        {{ assignment.description|safe }}
+                    </div>
+                </div>
+                
+                <!-- Student view: Show their submission if it exists -->
+                {% if not is_teacher and submission %}
+                    <div class="mt-4 pt-4 border-top">
+                        <h5><i class="fas fa-paper-plane me-2"></i>Your Submission</h5>
+                        <p class="text-muted">Submitted on {{ submission.submitted_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                        
+                        <div class="card bg-dark text-white mb-3">
+                            <div class="card-body">
+                                {{ submission.content|safe }}
+                            </div>
+                        </div>
+                        
+                        {% if submission.file_url %}
+                            <p>
+                                <a href="{{ submission.file_url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-external-link-alt me-1"></i> View Attached File
+                                </a>
+                            </p>
+                        {% endif %}
+                        
+                        {% if submission.grade is not none %}
+                            <div class="alert alert-success mt-3">
+                                <h5 class="alert-heading">Graded!</h5>
+                                <p><strong>Grade:</strong> {{ submission.grade }} / {{ assignment.points }}</p>
+                                {% if submission.feedback %}
+                                    <hr>
+                                    <p class="mb-0">
+                                        <strong>Feedback:</strong><br>
+                                        {{ submission.feedback }}
+                                    </p>
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <div class="alert alert-info mt-3">
+                                <p class="mb-0">Your submission is pending grading.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% elif not is_teacher and is_past_due %}
+                    <div class="alert alert-danger mt-3">
+                        <h5 class="alert-heading">Deadline Passed</h5>
+                        <p>This assignment is past its due date. Contact your instructor if you need an extension.</p>
+                    </div>
+                {% elif not is_teacher %}
+                    <div class="alert alert-warning mt-3">
+                        <h5 class="alert-heading">Not Submitted</h5>
+                        <p>You haven't submitted this assignment yet. The deadline is {{ assignment.due_date.strftime('%Y-%m-%d %H:%M') }}.</p>
+                        <a href="{{ url_for('assignments.submit', assignment_id=assignment.id) }}" class="btn btn-success">
+                            <i class="fas fa-paper-plane me-1"></i> Submit Assignment
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <!-- For Teachers: Show submissions -->
+        {% if is_teacher %}
+            <div class="card mb-4">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="fas fa-users me-2"></i>Student Submissions</h5>
+                </div>
+                <div class="card-body">
+                    {% if submissions %}
+                        <div class="list-group">
+                            {% for submission in submissions %}
+                                <div class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">{{ submission.student_name }}</h6>
+                                        <small>{{ submission.submitted_at.strftime('%Y-%m-%d') }}</small>
+                                    </div>
+                                    <p class="mb-1">
+                                        {% if submission.is_graded %}
+                                            <span class="badge bg-success">Graded: {{ submission.grade }}/{{ assignment.points }}</span>
+                                        {% else %}
+                                            <span class="badge bg-warning">Awaiting Grading</span>
+                                        {% endif %}
+                                    </p>
+                                    <div class="mt-2">
+                                        <a href="{{ url_for('assignments.grade_submission', submission_id=submission.id) }}" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-{% if submission.is_graded %}edit{% else %}check{% endif %} me-1"></i>
+                                            {{ submission.is_graded ? 'Update Grade' : 'Grade' }}
+                                        </a>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-inbox fa-3x mb-3 text-muted"></i>
+                            <p>No submissions yet.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+        
+        <!-- Course Navigation -->
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="fas fa-compass me-2"></i>Course Navigation</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    <a href="{{ url_for('courses.view', course_id=course.id) }}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-home me-2"></i> Course Home
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action">
+                        <i class="fas fa-book-open me-2"></i> Materials
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action active">
+                        <i class="fas fa-tasks me-2"></i> Assignments
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action">
+                        <i class="fas fa-question-circle me-2"></i> Quizzes
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Add the current datetime function for Jinja templates
+    function now() {
+        return new Date();
+    }
+</script>
+{% endblock %}

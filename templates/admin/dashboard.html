@@ -1,0 +1,286 @@
+{% extends "layout.html" %}
+
+{% block title %}Admin Dashboard - LMS{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h2 class="display-6"><i class="fas fa-cogs me-2"></i>Admin Dashboard</h2>
+        <p class="lead">System administration and management</p>
+    </div>
+</div>
+
+<!-- Stats Row -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card stat-card bg-primary text-white">
+            <div class="card-body">
+                <h5 class="card-title"><i class="fas fa-users me-2"></i>Total Users</h5>
+                <h2 class="display-4">{{ total_users }}</h2>
+                <p class="mb-0">
+                    <small>
+                        <i class="fas fa-user-tie me-1"></i> {{ admin_count }} Admins
+                        <i class="fas fa-chalkboard-teacher ms-2 me-1"></i> {{ teacher_count }} Teachers
+                        <i class="fas fa-user-graduate ms-2 me-1"></i> {{ student_count }} Students
+                    </small>
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card bg-success text-white">
+            <div class="card-body">
+                <h5 class="card-title"><i class="fas fa-book me-2"></i>Total Courses</h5>
+                <h2 class="display-4">{{ course_count }}</h2>
+                <p class="mb-0">
+                    <small>
+                        <i class="fas fa-check-circle me-1"></i> {{ active_course_count }} Active
+                        <i class="fas fa-times-circle ms-2 me-1"></i> {{ inactive_course_count }} Inactive
+                    </small>
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card bg-info text-white">
+            <div class="card-body">
+                <h5 class="card-title"><i class="fas fa-clipboard-list me-2"></i>Assignments</h5>
+                <h2 class="display-4">{{ assignment_count }}</h2>
+                <p class="mb-0">
+                    <small>
+                        <i class="fas fa-file-alt me-1"></i> {{ submission_count }} Submissions
+                    </small>
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card bg-warning text-dark">
+            <div class="card-body">
+                <h5 class="card-title"><i class="fas fa-question-circle me-2"></i>Quizzes</h5>
+                <h2 class="display-4">{{ quiz_count }}</h2>
+                <p class="mb-0">
+                    <small>
+                        <i class="fas fa-edit me-1"></i> {{ quiz_attempt_count }} Attempts
+                    </small>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content Area -->
+<div class="row">
+    <!-- Left Column -->
+    <div class="col-lg-8">
+        <!-- Recent Users -->
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-user-plus me-2"></i>Recent Users</h5>
+                <a href="{{ url_for('admin.users') }}" class="btn btn-sm btn-outline-light">View All</a>
+            </div>
+            <div class="card-body">
+                {% if recent_users %}
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Joined</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in recent_users %}
+                                    <tr>
+                                        <td>{{ user.username }}</td>
+                                        <td>{{ user.first_name }} {{ user.last_name }}</td>
+                                        <td>{{ user.email }}</td>
+                                        <td>
+                                            {% if user.role == 'admin' %}
+                                                <span class="badge bg-danger">Admin</span>
+                                            {% elif user.role == 'teacher' %}
+                                                <span class="badge bg-primary">Teacher</span>
+                                            {% else %}
+                                                <span class="badge bg-success">Student</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ user.created_at.strftime('%Y-%m-%d') }}</td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <a href="{{ url_for('admin.edit_user', user_id=user.id) }}" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteUserModal{{ user.id }}">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                            
+                                            <!-- Delete User Modal -->
+                                            <div class="modal fade" id="deleteUserModal{{ user.id }}" tabindex="-1" aria-labelledby="deleteUserModalLabel{{ user.id }}" aria-hidden="true">
+                                                <div class="modal-dialog">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title" id="deleteUserModalLabel{{ user.id }}">Confirm Deletion</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            Are you sure you want to delete user <strong>{{ user.username }}</strong>? This action cannot be undone.
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                            <a href="{{ url_for('admin.delete_user', user_id=user.id) }}" class="btn btn-danger">Delete User</a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-users fa-3x mb-3 text-muted"></i>
+                        <p class="lead">No users found.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="fas fa-history me-2"></i>System Activity</h5>
+            </div>
+            <div class="card-body">
+                {% if system_activities %}
+                    <ul class="list-group list-group-flush">
+                        {% for activity in system_activities %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="badge bg-{{ activity.type_color }} me-2">{{ activity.type }}</span>
+                                    {{ activity.description }}
+                                    {% if activity.user %}
+                                        by <strong>{{ activity.user }}</strong>
+                                    {% endif %}
+                                </div>
+                                <small class="text-muted">{{ activity.time }}</small>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-inbox fa-3x mb-3 text-muted"></i>
+                        <p class="lead">No system activity found.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column -->
+    <div class="col-lg-4">
+        <!-- Quick Actions -->
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('admin.create_user') }}" class="btn btn-primary">
+                        <i class="fas fa-user-plus me-2"></i> Create New User
+                    </a>
+                    <a href="{{ url_for('courses.create') }}" class="btn btn-success">
+                        <i class="fas fa-book-medical me-2"></i> Create New Course
+                    </a>
+                    <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#systemBackupModal">
+                        <i class="fas fa-database me-2"></i> Manage System Data
+                    </button>
+                    <a href="{{ url_for('admin.system_settings') }}" class="btn btn-secondary">
+                        <i class="fas fa-cog me-2"></i> System Settings
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Health -->
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="fas fa-heartbeat me-2"></i>System Health</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Database Status
+                        <span class="badge bg-success">Healthy</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Server Load
+                        <span class="badge bg-info">Normal</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Storage Usage
+                        <span class="badge bg-warning">65%</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Memory Usage
+                        <span class="badge bg-success">45%</span>
+                    </li>
+                </ul>
+                <div class="text-center mt-3">
+                    <button type="button" class="btn btn-sm btn-outline-secondary">View Detailed Report</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Notices -->
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="fas fa-bell me-2"></i>System Notices</h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <strong>Maintenance Notice:</strong> System backup scheduled for this weekend.
+                </div>
+                <div class="alert alert-info">
+                    <strong>New Feature:</strong> Quiz randomization option now available.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- System Backup Modal -->
+<div class="modal fade" id="systemBackupModal" tabindex="-1" aria-labelledby="systemBackupModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="systemBackupModalLabel">System Data Management</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Choose a data management operation:</p>
+                <div class="list-group">
+                    <button type="button" class="list-group-item list-group-item-action">
+                        <i class="fas fa-download me-2"></i> Export System Data
+                    </button>
+                    <button type="button" class="list-group-item list-group-item-action">
+                        <i class="fas fa-upload me-2"></i> Import System Data
+                    </button>
+                    <button type="button" class="list-group-item list-group-item-action">
+                        <i class="fas fa-trash-alt me-2"></i> Clear Test Data
+                    </button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

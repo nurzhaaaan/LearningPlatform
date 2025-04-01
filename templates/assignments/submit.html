@@ -1,0 +1,170 @@
+{% extends "layout.html" %}
+
+{% block title %}Submit Assignment - LMS{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2 class="display-6"><i class="fas fa-paper-plane me-2"></i>Submit Assignment</h2>
+        <p class="lead">{{ assignment.title }} - {{ course.title }}</p>
+    </div>
+    <div class="col-md-4 text-md-end">
+        <a href="{{ url_for('assignments.view', assignment_id=assignment.id) }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Back to Assignment
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="fas fa-clipboard-list me-2"></i>Assignment Details</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-3">
+                    <div>
+                        <span class="badge bg-primary me-2">{{ assignment.points }} points</span>
+                    </div>
+                    <div>
+                        <strong>Due:</strong> {{ assignment.due_date.strftime('%Y-%m-%d %H:%M') }}
+                    </div>
+                </div>
+                
+                <div class="material-content mb-4">
+                    {{ assignment.description|safe }}
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-paper-plane me-2"></i>Your Submission</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('assignments.submit', assignment_id=assignment.id) }}">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-3">
+                        <label for="content" class="form-label">Your Answer</label>
+                        {{ form.content(class="form-control", rows="10", placeholder="Enter your answer here", id="content") }}
+                        {% if form.content.errors %}
+                            <div class="text-danger">
+                                {% for error in form.content.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="file_url" class="form-label">File URL (Optional)</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-link"></i></span>
+                            {{ form.file_url(class="form-control", placeholder="Enter URL to your file if applicable", id="file_url") }}
+                        </div>
+                        <small class="text-muted">Provide a URL to your file if needed (Google Drive, Dropbox, etc.)</small>
+                        {% if form.file_url.errors %}
+                            <div class="text-danger">
+                                {% for error in form.file_url.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('assignments.view', assignment_id=assignment.id) }}" class="btn btn-secondary">
+                            <i class="fas fa-times me-1"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-paper-plane me-1"></i> Submit Assignment
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <!-- Submission Guidelines -->
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Submission Guidelines</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        Complete all required sections in your submission
+                    </li>
+                    <li class="list-group-item">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        Provide detailed explanations where required
+                    </li>
+                    <li class="list-group-item">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        If submitting code, ensure it's properly formatted
+                    </li>
+                    <li class="list-group-item">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        You can use Markdown for text formatting
+                    </li>
+                    <li class="list-group-item">
+                        <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                        Submissions cannot be edited after submission
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Deadline Info -->
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="fas fa-clock me-2"></i>Deadline Information</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Due Date:</strong> {{ assignment.due_date.strftime('%Y-%m-%d at %H:%M') }}</p>
+                
+                {% set time_left = assignment.due_date - now() %}
+                {% if time_left.total_seconds() > 0 %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-hourglass-half me-2"></i>
+                        <strong>Time remaining:</strong>
+                        {% if time_left.days > 0 %}
+                            {{ time_left.days }} days
+                        {% elif time_left.seconds // 3600 > 0 %}
+                            {{ time_left.seconds // 3600 }} hours
+                        {% elif time_left.seconds // 60 > 0 %}
+                            {{ time_left.seconds // 60 }} minutes
+                        {% else %}
+                            Less than a minute
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        <strong>Late submission:</strong> This submission will be marked as late.
+                    </div>
+                {% endif %}
+                
+                <p class="mb-0 text-muted">
+                    <small>
+                        <i class="fas fa-info-circle me-1"></i>
+                        Contact your instructor if you need an extension.
+                    </small>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Add the current datetime function for Jinja templates
+    function now() {
+        return new Date();
+    }
+</script>
+{% endblock %}

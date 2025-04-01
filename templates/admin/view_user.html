@@ -1,0 +1,291 @@
+{% extends "layout.html" %}
+
+{% block title %}User Details - LMS{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2 class="display-6"><i class="fas fa-user me-2"></i>User Details</h2>
+        <p class="lead">{{ user.username }}</p>
+    </div>
+    <div class="col-md-4 text-md-end">
+        <div class="btn-group">
+            <a href="{{ url_for('admin.edit_user', user_id=user.id) }}" class="btn btn-primary">
+                <i class="fas fa-edit me-1"></i> Edit User
+            </a>
+            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteUserModal">
+                <i class="fas fa-trash me-1"></i> Delete
+            </button>
+            <a href="{{ url_for('admin.users') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Back
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Delete User Modal -->
+<div class="modal fade" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteUserModalLabel">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the user <strong>{{ user.username }}</strong>?</p>
+                <p class="text-danger">This action cannot be undone. All associated data will be permanently deleted.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <a href="{{ url_for('admin.delete_user', user_id=user.id) }}" class="btn btn-danger">Delete User</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- User Information -->
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="fas fa-id-card me-2"></i>User Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-3 fw-bold">Username</div>
+                    <div class="col-md-9">{{ user.username }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-3 fw-bold">Full Name</div>
+                    <div class="col-md-9">{{ user.first_name }} {{ user.last_name }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-3 fw-bold">Email</div>
+                    <div class="col-md-9">{{ user.email }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-3 fw-bold">Role</div>
+                    <div class="col-md-9">
+                        {% if user.role == 'admin' %}
+                            <span class="badge bg-danger">Administrator</span>
+                        {% elif user.role == 'teacher' %}
+                            <span class="badge bg-primary">Teacher</span>
+                        {% else %}
+                            <span class="badge bg-success">Student</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-3 fw-bold">Joined</div>
+                    <div class="col-md-9">{{ user.created_at.strftime('%Y-%m-%d') }}</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 fw-bold">Status</div>
+                    <div class="col-md-9">
+                        <span class="badge bg-success">Active</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Activity Based on Role -->
+        {% if user.role == 'student' %}
+            <!-- Student Enrollments -->
+            <div class="card mb-4">
+                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-book me-2"></i>Enrolled Courses</h5>
+                    <span class="badge bg-secondary">{{ courses_enrolled|length }}</span>
+                </div>
+                <div class="card-body">
+                    {% if courses_enrolled %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Course</th>
+                                        <th>Enrollment Date</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for course in courses_enrolled %}
+                                        <tr>
+                                            <td>{{ course.title }}</td>
+                                            <td>{{ course.enrollment_date }}</td>
+                                            <td>
+                                                <a href="{{ url_for('courses.view', course_id=course.id) }}" class="btn btn-sm btn-primary">
+                                                    <i class="fas fa-eye"></i> View
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-book fa-3x mb-3 text-muted"></i>
+                            <p>This student is not enrolled in any courses.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% elif user.role == 'teacher' %}
+            <!-- Teacher Courses -->
+            <div class="card mb-4">
+                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-chalkboard me-2"></i>Teaching Courses</h5>
+                    <span class="badge bg-secondary">{{ courses_teaching|length }}</span>
+                </div>
+                <div class="card-body">
+                    {% if courses_teaching %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Course</th>
+                                        <th>Code</th>
+                                        <th>Students</th>
+                                        <th>Created</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for course in courses_teaching %}
+                                        <tr>
+                                            <td>{{ course.title }}</td>
+                                            <td>{{ course.code }}</td>
+                                            <td>{{ course.student_count }}</td>
+                                            <td>{{ course.created_at }}</td>
+                                            <td>
+                                                <a href="{{ url_for('courses.view', course_id=course.id) }}" class="btn btn-sm btn-primary">
+                                                    <i class="fas fa-eye"></i> View
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-chalkboard fa-3x mb-3 text-muted"></i>
+                            <p>This teacher is not teaching any courses.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+        <div class="card mb-4 text-center">
+            <div class="card-body">
+                <div class="mb-3">
+                    <i class="fas fa-user-circle fa-7x text-primary"></i>
+                </div>
+                <h4>{{ user.first_name }} {{ user.last_name }}</h4>
+                <p class="text-muted">
+                    {% if user.role == 'admin' %}
+                        Administrator
+                    {% elif user.role == 'teacher' %}
+                        Teacher
+                    {% else %}
+                        Student
+                    {% endif %}
+                </p>
+                
+                <div class="mt-3">
+                    <a href="{{ url_for('admin.edit_user', user_id=user.id) }}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-edit me-1"></i> Edit User
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- User Stats -->
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>User Statistics</h5>
+            </div>
+            <div class="card-body">
+                {% if user.role == 'student' %}
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Enrolled Courses
+                            <span class="badge bg-primary rounded-pill">{{ courses_enrolled|length }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Completed Assignments
+                            <span class="badge bg-primary rounded-pill">{{ user.submissions|length }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Quiz Attempts
+                            <span class="badge bg-primary rounded-pill">{{ user.quiz_attempts|length }}</span>
+                        </li>
+                    </ul>
+                {% elif user.role == 'teacher' %}
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Courses Teaching
+                            <span class="badge bg-primary rounded-pill">{{ courses_teaching|length }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Total Students
+                            <span class="badge bg-primary rounded-pill">{{ courses_teaching|sum(attribute='student_count', default=0) }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Account Age
+                            <span class="badge bg-secondary rounded-pill">Active Account</span>
+                        </li>
+                    </ul>
+                {% else %}
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Admin Since
+                            <span class="badge bg-secondary rounded-pill">{{ user.created_at.strftime('%Y-%m-%d') }}</span>
+                        </li>
+                    </ul>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Quick Actions -->
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    {% if user.role == 'teacher' %}
+                        <a href="#" class="btn btn-outline-primary">
+                            <i class="fas fa-envelope me-1"></i> Send Message
+                        </a>
+                        <a href="#" class="btn btn-outline-secondary">
+                            <i class="fas fa-chalkboard me-1"></i> View Teaching Dashboard
+                        </a>
+                    {% elif user.role == 'student' %}
+                        <a href="#" class="btn btn-outline-primary">
+                            <i class="fas fa-envelope me-1"></i> Send Message
+                        </a>
+                        <a href="#" class="btn btn-outline-secondary">
+                            <i class="fas fa-graduation-cap me-1"></i> View Academic Progress
+                        </a>
+                    {% endif %}
+                    
+                    <a href="{{ url_for('admin.users') }}" class="btn btn-outline-dark">
+                        <i class="fas fa-arrow-left me-1"></i> Back to User List
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Add any custom JS for this page here
+</script>
+{% endblock %}
