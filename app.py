@@ -6,6 +6,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
 from flask_login import LoginManager
+from flask_migrate import Migrate
 
 
 # Configure logging
@@ -17,6 +18,7 @@ class Base(DeclarativeBase):
 
 db = SQLAlchemy(model_class=Base)
 login_manager = LoginManager()
+migrate = Migrate()
 
 # create the app
 app = Flask(__name__)
@@ -31,6 +33,7 @@ app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
 
 # Initialize extensions
 db.init_app(app)
+migrate.init_app(app, db)
 login_manager.init_app(app)
 login_manager.login_view = 'auth.login'
 login_manager.login_message_category = 'info'
@@ -42,9 +45,8 @@ def inject_current_year():
 
 # Register blueprints
 with app.app_context():
-    # Import models and create tables
+    # Import models
     import models  # noqa: F401
-    db.create_all()
     
     # Import and register blueprints
     from routes.auth import auth
