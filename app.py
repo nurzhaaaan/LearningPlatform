@@ -7,6 +7,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
 from flask_login import LoginManager
 from flask_migrate import Migrate
+from flask_wtf.csrf import CSRFProtect
 
 
 # Configure logging
@@ -19,6 +20,7 @@ class Base(DeclarativeBase):
 db = SQLAlchemy(model_class=Base)
 login_manager = LoginManager()
 migrate = Migrate()
+csrf = CSRFProtect()
 
 # create the app
 app = Flask(__name__)
@@ -37,6 +39,7 @@ migrate.init_app(app, db)
 login_manager.init_app(app)
 login_manager.login_view = 'auth.login'
 login_manager.login_message_category = 'info'
+csrf.init_app(app)
 
 # Add context processor for templates
 @app.context_processor
