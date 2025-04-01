@@ -116,3 +116,16 @@ class ProfileForm(FlaskForm):
     new_password = PasswordField('New Password')
     confirm_password = PasswordField('Confirm New Password', validators=[EqualTo('new_password')])
     submit = SubmitField('Update Profile')
+
+class RequestPasswordResetForm(FlaskForm):
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    submit = SubmitField('Request Password Reset')
+
+class VerifyCodeForm(FlaskForm):
+    code = StringField('Verification Code', validators=[DataRequired(), Length(min=6, max=6)])
+    submit = SubmitField('Verify Code')
+
+class ResetPasswordForm(FlaskForm):
+    password = PasswordField('New Password', validators=[DataRequired(), Length(min=8)])
+    confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
+    submit = SubmitField('Reset Password')

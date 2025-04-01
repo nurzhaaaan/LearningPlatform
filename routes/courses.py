@@ -309,3 +309,69 @@ def unenroll(course_id):
         flash('Error unenrolling from course. Please try again.', 'danger')
     
     return redirect(url_for('courses.index'))
+
+@courses.route('/enrolled-courses')
+@login_required
+def enrolled():
+    """Display all courses the student is enrolled in"""
+    if not current_user.is_student():
+        flash('This page is only available for students.', 'warning')
+        return redirect(url_for('courses.index'))
+    
+    page = request.args.get('page', 1, type=int)
+    per_page = 9  # Number of courses per page
+    
+    # Get enrolled courses
+    enrolled_courses_query = Course.query.join(Enrollment).filter(
+        Enrollment.student_id == current_user.id,
+        Enrollment.is_active == True
+    ).order_by(desc(Enrollment.enrollment_date))
+    
+    # Execute paginated query
+    pagination = enrolled_courses_query.paginate(page=page, per_page=per_page, error_out=False)
+    courses_result = pagination.items
+    
+    # Prepare courses data with additional information
+    courses_data = []
+    for course in courses_result:
+        # Get teacher name
+        teacher = User.query.get(course.teacher_id)
+        teacher_name = f"{teacher.first_name} {teacher.last_name}" if teacher else "Unknown"
+        
+        # Get enrollment date
+        enrollment = Enrollment.query.filter_by(
+            student_id=current_user.id,
+            course_id=course.id,
+            is_active=True
+        ).first()
+        enrollment_date = enrollment.enrollment_date if enrollment else None
+        
+        # Calculate progress (simplified version)
+        # In a real implementation, this would be more sophisticated
+        progress = 30  # Mock progress percentage
+        
+        # Count materials, assignments, and quizzes for this course
+        materials_count = Material.query.filter_by(course_id=course.id).count()
+        assignments_count = Assignment.query.filter_by(course_id=course.id).count()
+        quizzes_count = Quiz.query.filter_by(course_id=course.id).count()
+        
+        course_data = {
+            'id': course.id,
+            'title': course.title,
+            'code': course.code,
+            'description': course.description,
+            'teacher_id': course.teacher_id,
+            'teacher_name': teacher_name,
+            'enrollment_date': enrollment_date,
+            'progress': progress,
+            'materials_count': materials_count,
+            'assignments_count': assignments_count,
+            'quizzes_count': quizzes_count
+        }
+        courses_data.append(course_data)
+    
+    return render_template(
+        'courses/enrolled.html',
+        courses=courses_data,
+        pagination=pagination
+    )

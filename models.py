@@ -18,6 +18,8 @@ class User(UserMixin, db.Model):
     last_name = db.Column(db.String(64), nullable=False)
     role = db.Column(db.String(20), nullable=False, default=Role.STUDENT)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    reset_code = db.Column(db.String(6))
+    reset_code_expires = db.Column(db.DateTime)
     
     # Relationships
     courses_teaching = db.relationship('Course', backref='teacher', lazy=True, 
@@ -44,6 +46,35 @@ class User(UserMixin, db.Model):
     
     def __repr__(self):
         return f'<User {self.username}>'
+        
+    def generate_reset_code(self):
+        """Generate a random 6-digit code for password reset and set expiration time to 30 minutes from now"""
+        import random
+        import string
+        from datetime import datetime, timedelta
+        
+        # Generate a random 6-digit code
+        code = ''.join(random.choices(string.digits, k=6))
+        self.reset_code = code
+        self.reset_code_expires = datetime.utcnow() + timedelta(minutes=30)
+        
+        return code
+        
+    def verify_reset_code(self, code):
+        """Verify if the provided code matches and hasn't expired"""
+        if not self.reset_code or not self.reset_code_expires:
+            return False
+            
+        if datetime.utcnow() > self.reset_code_expires:
+            # Code has expired
+            return False
+            
+        return self.reset_code == code
+        
+    def clear_reset_code(self):
+        """Clear the reset code after it's been used"""
+        self.reset_code = None
+        self.reset_code_expires = None
 
 
 class Course(db.Model):

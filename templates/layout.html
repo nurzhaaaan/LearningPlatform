@@ -24,10 +24,29 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
+                    <!-- Home link always visible -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('auth.index') }}">
+                            <i class="fas fa-home me-1"></i> Home
+                        </a>
+                    </li>
+                    <!-- About Us link always visible -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('auth.about') }}">
+                            <i class="fas fa-info-circle me-1"></i> About Us
+                        </a>
+                    </li>
+                    <!-- All Courses link always visible -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('courses.index') }}">
+                            <i class="fas fa-book me-1"></i> All Courses
+                        </a>
+                    </li>
                     {% if current_user.is_authenticated %}
+                        <!-- Enrolled Courses link for authenticated users -->
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('courses.index') }}">
-                                <i class="fas fa-book me-1"></i> Courses
+                            <a class="nav-link" href="{{ url_for('courses.enrolled') }}">
+                                <i class="fas fa-graduation-cap me-1"></i> My Learning
                             </a>
                         </li>
                         {% if current_user.is_admin() %}
@@ -110,8 +129,11 @@
                 <div class="col-md-3">
                     <h5>Quick Links</h5>
                     <ul class="list-unstyled">
-                        <li><a href="{{ url_for('courses.index') }}" class="text-white">Courses</a></li>
+                        <li><a href="{{ url_for('auth.index') }}" class="text-white">Home</a></li>
+                        <li><a href="{{ url_for('auth.about') }}" class="text-white">About Us</a></li>
+                        <li><a href="{{ url_for('courses.index') }}" class="text-white">All Courses</a></li>
                         {% if current_user.is_authenticated %}
+                            <li><a href="{{ url_for('courses.enrolled') }}" class="text-white">My Learning</a></li>
                             <li><a href="{{ url_for('profile.view_profile') }}" class="text-white">Profile</a></li>
                         {% else %}
                             <li><a href="{{ url_for('auth.login') }}" class="text-white">Login</a></li>

@@ -1,0 +1,165 @@
+{% extends "layout.html" %}
+
+{% block title %}About Us - Learning Management System{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-5">
+        <div class="col-md-8">
+            <h1 class="display-4 fw-bold">About Our Learning Platform</h1>
+            <p class="lead">Empowering education through technology since 2023</p>
+            <hr class="my-4">
+        </div>
+        <div class="col-md-4 text-center">
+            <i class="fas fa-graduation-cap fa-6x text-primary mb-3"></i>
+        </div>
+    </div>
+
+    <!-- Mission and Vision -->
+    <div class="row mb-5">
+        <div class="col-md-6">
+            <div class="card h-100 bg-dark text-white">
+                <div class="card-body">
+                    <h2 class="card-title"><i class="fas fa-bullseye me-2"></i>Our Mission</h2>
+                    <p class="card-text">
+                        Our mission is to provide accessible, high-quality education to students around the world. 
+                        We believe that education should be available to everyone, regardless of their location or background.
+                    </p>
+                    <p class="card-text">
+                        Through our platform, we aim to connect passionate instructors with eager learners, 
+                        creating a community of growth and knowledge sharing.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card h-100 bg-dark text-white">
+                <div class="card-body">
+                    <h2 class="card-title"><i class="fas fa-eye me-2"></i>Our Vision</h2>
+                    <p class="card-text">
+                        We envision a world where quality education is accessible to everyone, everywhere. 
+                        A world where learning knows no boundaries and knowledge empowers individuals to achieve their dreams.
+                    </p>
+                    <p class="card-text">
+                        We strive to create the most comprehensive and user-friendly learning platform 
+                        that adapts to the evolving needs of students and educators alike.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Our Story -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body p-4">
+                    <h2 class="card-title"><i class="fas fa-book-open me-2"></i>Our Story</h2>
+                    <p class="card-text">
+                        Founded in 2023, our Learning Management System began with a simple idea: to make quality education 
+                        accessible to everyone. What started as a small project has grown into a comprehensive 
+                        platform serving thousands of students worldwide.
+                    </p>
+                    <p class="card-text">
+                        Our journey has been guided by a commitment to innovation and excellence in online education. 
+                        We continuously evolve our platform based on feedback from our community of learners and instructors.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Our Team -->
+    <h2 class="display-6 mb-4 text-center">Meet Our Team</h2>
+    <div class="row row-cols-1 row-cols-md-3 g-4 mb-5">
+        <!-- Team Member 1 -->
+        <div class="col">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-user-circle fa-5x mb-3 text-primary"></i>
+                    <h5 class="card-title">John Doe</h5>
+                    <p class="card-subtitle mb-2 text-muted">Founder & CEO</p>
+                    <p class="card-text">
+                        With over 15 years of experience in education technology, John leads our vision for 
+                        revolutionizing online learning.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <!-- Team Member 2 -->
+        <div class="col">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-user-circle fa-5x mb-3 text-primary"></i>
+                    <h5 class="card-title">Jane Smith</h5>
+                    <p class="card-subtitle mb-2 text-muted">Head of Education</p>
+                    <p class="card-text">
+                        A former professor with a passion for curriculum development, Jane ensures our 
+                        platform meets the highest educational standards.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <!-- Team Member 3 -->
+        <div class="col">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-user-circle fa-5x mb-3 text-primary"></i>
+                    <h5 class="card-title">Michael Johnson</h5>
+                    <p class="card-subtitle mb-2 text-muted">Tech Lead</p>
+                    <p class="card-text">
+                        Michael's expertise in building scalable web applications ensures our platform 
+                        provides a seamless learning experience.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics -->
+    <div class="row text-center mb-5">
+        <div class="col-md-4">
+            <div class="p-3">
+                <h2 class="display-4 fw-bold text-primary">5,000+</h2>
+                <p class="lead">Students Enrolled</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="p-3">
+                <h2 class="display-4 fw-bold text-primary">200+</h2>
+                <p class="lead">Expert Instructors</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="p-3">
+                <h2 class="display-4 fw-bold text-primary">500+</h2>
+                <p class="lead">Courses Available</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Call to Action -->
+    <div class="row">
+        <div class="col-12 text-center">
+            <div class="card bg-dark text-white">
+                <div class="card-body p-5">
+                    <h2 class="card-title mb-3">Ready to Start Learning?</h2>
+                    <p class="card-text fs-5 mb-4">
+                        Join thousands of students who are already expanding their knowledge and skills.
+                    </p>
+                    <div>
+                        <a href="{{ url_for('courses.index') }}" class="btn btn-primary btn-lg me-2">
+                            <i class="fas fa-book me-1"></i> Browse Courses
+                        </a>
+                        {% if not current_user.is_authenticated %}
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-outline-light btn-lg">
+                            <i class="fas fa-user-plus me-1"></i> Sign Up Today
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
