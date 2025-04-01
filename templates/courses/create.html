@@ -1,12 +1,12 @@
 {% extends "layout.html" %}
 
-{% block title %}Create Course - LMS{% endblock %}
+{% block title %}Create Test Prep Course - TestPrep Academy{% endblock %}
 
 {% block content %}
 <div class="row mb-4">
     <div class="col-md-12">
-        <h2 class="display-6"><i class="fas fa-book-medical me-2"></i>Create New Course</h2>
-        <p class="lead">Add a new course to the system</p>
+        <h2 class="display-6"><i class="fas fa-book-medical me-2"></i>Create New Test Prep Course</h2>
+        <p class="lead">Add a new exam preparation course to the system</p>
     </div>
 </div>
 
@@ -39,11 +39,61 @@
                         <label for="code" class="form-label">Course Code</label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="fas fa-code"></i></span>
-                            {{ form.code(class="form-control", placeholder="Enter course code (e.g., CS101)", id="code") }}
+                            {{ form.code(class="form-control", placeholder="Enter course code (e.g., IELTS101)", id="code") }}
                         </div>
                         {% if form.code.errors %}
                             <div class="text-danger">
                                 {% for error in form.code.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="exam_type" class="form-label">Exam Type</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-graduation-cap"></i></span>
+                                    {{ form.exam_type(class="form-select", id="exam_type") }}
+                                </div>
+                                {% if form.exam_type.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.exam_type.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="difficulty_level" class="form-label">Difficulty Level</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-chart-line"></i></span>
+                                    {{ form.difficulty_level(class="form-select", id="difficulty_level") }}
+                                </div>
+                                {% if form.difficulty_level.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.difficulty_level.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="duration_weeks" class="form-label">Course Duration (weeks)</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                            {{ form.duration_weeks(class="form-control", id="duration_weeks") }}
+                        </div>
+                        {% if form.duration_weeks.errors %}
+                            <div class="text-danger">
+                                {% for error in form.duration_weeks.errors %}
                                     <small>{{ error }}</small>
                                 {% endfor %}
                             </div>

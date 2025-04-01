@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, SelectField, TextAreaField, BooleanField, DateTimeField, IntegerField, FileField, RadioField
 from wtforms.validators import DataRequired, Email, EqualTo, Length, ValidationError
-from models import User, Role
+from models import User, Role, ExamType
 
 class LoginForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
@@ -59,6 +59,19 @@ class CourseForm(FlaskForm):
     code = StringField('Course Code', validators=[DataRequired(), Length(max=20)])
     description = TextAreaField('Description', validators=[DataRequired()])
     is_active = BooleanField('Active', default=True)
+    exam_type = SelectField('Exam Type', choices=[
+        (ExamType.IELTS, 'IELTS'), 
+        (ExamType.SAT, 'SAT'), 
+        (ExamType.NUET, 'NUET'), 
+        (ExamType.UTO, 'UTO'),
+        (ExamType.GENERAL, 'General')
+    ], validators=[DataRequired()])
+    difficulty_level = SelectField('Difficulty Level', choices=[
+        ('beginner', 'Beginner'),
+        ('intermediate', 'Intermediate'),
+        ('advanced', 'Advanced')
+    ], validators=[DataRequired()])
+    duration_weeks = IntegerField('Duration (weeks)', default=8, validators=[DataRequired()])
     submit = SubmitField('Save Course')
 
 class MaterialForm(FlaskForm):

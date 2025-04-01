@@ -77,6 +77,13 @@ class User(UserMixin, db.Model):
         self.reset_code_expires = None
 
 
+class ExamType:
+    IELTS = 'ielts'
+    SAT = 'sat'
+    NUET = 'nuet'
+    UTO = 'uto'
+    GENERAL = 'general'
+
 class Course(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
@@ -85,6 +92,9 @@ class Course(db.Model):
     teacher_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     is_active = db.Column(db.Boolean, default=True)
+    exam_type = db.Column(db.String(20), default=ExamType.GENERAL)
+    difficulty_level = db.Column(db.String(20), default='intermediate')
+    duration_weeks = db.Column(db.Integer, default=8)
     
     # Relationships
     materials = db.relationship('Material', backref='course', lazy=True, 

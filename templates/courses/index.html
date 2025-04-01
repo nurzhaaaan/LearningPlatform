@@ -1,18 +1,18 @@
 {% extends "layout.html" %}
 
-{% block title %}Courses - LMS{% endblock %}
+{% block title %}Test Prep Courses - TestPrep Academy{% endblock %}
 
 {% block content %}
 <div class="row mb-4">
     <div class="col-md-8">
-        <h2 class="display-6"><i class="fas fa-book me-2"></i>Courses</h2>
+        <h2 class="display-6"><i class="fas fa-graduation-cap me-2"></i>Test Preparation Courses</h2>
         <p class="lead">
             {% if current_user.is_student() %}
-                Browse and enroll in available courses
+                Browse and enroll in available exam preparation courses
             {% elif current_user.is_teacher() %}
-                Manage your courses and create new ones
+                Manage your test prep courses and create new ones
             {% else %}
-                All courses in the system
+                All test preparation courses in the system
             {% endif %}
         </p>
     </div>
@@ -25,10 +25,40 @@
     </div>
 </div>
 
+<!-- Exam Type Quick Filters -->
+<div class="mb-4">
+    <div class="d-flex flex-wrap gap-2">
+        <a href="{{ url_for('courses.index') }}" class="btn {% if not request.args.get('exam') %}btn-dark{% else %}btn-outline-dark{% endif %}">
+            All Exams
+        </a>
+        <a href="{{ url_for('courses.index', exam='ielts', filter=request.args.get('filter', ''), sort=request.args.get('sort', ''), search=request.args.get('search', '')) }}" 
+           class="btn {% if request.args.get('exam') == 'ielts' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+            IELTS
+        </a>
+        <a href="{{ url_for('courses.index', exam='sat', filter=request.args.get('filter', ''), sort=request.args.get('sort', ''), search=request.args.get('search', '')) }}" 
+           class="btn {% if request.args.get('exam') == 'sat' %}btn-info{% else %}btn-outline-info{% endif %}">
+            SAT
+        </a>
+        <a href="{{ url_for('courses.index', exam='nuet', filter=request.args.get('filter', ''), sort=request.args.get('sort', ''), search=request.args.get('search', '')) }}" 
+           class="btn {% if request.args.get('exam') == 'nuet' %}btn-success{% else %}btn-outline-success{% endif %}">
+            NUET
+        </a>
+        <a href="{{ url_for('courses.index', exam='uto', filter=request.args.get('filter', ''), sort=request.args.get('sort', ''), search=request.args.get('search', '')) }}" 
+           class="btn {% if request.args.get('exam') == 'uto' %}btn-warning{% else %}btn-outline-warning{% endif %}">
+            UTO
+        </a>
+    </div>
+</div>
+
 <!-- Filter and Search -->
 <div class="card mb-4">
     <div class="card-body">
         <form action="{{ url_for('courses.index') }}" method="GET" class="row g-3">
+            <!-- Hidden exam type if already filtered -->
+            {% if request.args.get('exam') %}
+                <input type="hidden" name="exam" value="{{ request.args.get('exam') }}">
+            {% endif %}
+            
             <div class="col-md-5">
                 <div class="input-group">
                     <span class="input-group-text"><i class="fas fa-search"></i></span>
@@ -75,6 +105,22 @@
                     </div>
                     <div class="card-body">
                         <p class="card-text">{{ course.description|truncate(100) }}</p>
+                        
+                        <div class="d-flex flex-wrap gap-1 mb-2">
+                            {% if course.exam_type == 'ielts' %}
+                                <span class="badge bg-primary">IELTS</span>
+                            {% elif course.exam_type == 'sat' %}
+                                <span class="badge bg-info">SAT</span>
+                            {% elif course.exam_type == 'nuet' %}
+                                <span class="badge bg-success">NUET</span>
+                            {% elif course.exam_type == 'uto' %}
+                                <span class="badge bg-warning">UTO</span>
+                            {% else %}
+                                <span class="badge bg-secondary">General</span>
+                            {% endif %}
+                            <span class="badge bg-dark">{{ course.difficulty_level|title }}</span>
+                            <span class="badge bg-secondary">{{ course.duration_weeks }} weeks</span>
+                        </div>
                         
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <small class="text-muted">
@@ -150,9 +196,9 @@
             <div class="text-center py-5">
                 <i class="fas fa-book fa-4x mb-3 text-muted"></i>
                 <h3>No courses found</h3>
-                {% if request.args.get('search') or request.args.get('filter') %}
+                {% if request.args.get('search') or request.args.get('filter') or request.args.get('exam') %}
                     <p>Try changing your search or filter criteria.</p>
-                    <a href="{{ url_for('courses.index') }}" class="btn btn-primary">Clear Filters</a>
+                    <a href="{{ url_for('courses.index') }}" class="btn btn-primary">Clear All Filters</a>
                 {% else %}
                     {% if current_user.is_teacher() %}
                         <p>You haven't created any courses yet.</p>
@@ -172,7 +218,7 @@
         <ul class="pagination justify-content-center">
             {% if pagination.has_prev %}
                 <li class="page-item">
-                    <a class="page-link" href="{{ url_for('courses.index', page=pagination.prev_num, search=request.args.get('search', ''), filter=request.args.get('filter', ''), sort=request.args.get('sort', '')) }}">Previous</a>
+                    <a class="page-link" href="{{ url_for('courses.index', page=pagination.prev_num, search=request.args.get('search', ''), filter=request.args.get('filter', ''), sort=request.args.get('sort', ''), exam=request.args.get('exam', '')) }}">Previous</a>
                 </li>
             {% else %}
                 <li class="page-item disabled">
@@ -188,7 +234,7 @@
                         </li>
                     {% else %}
                         <li class="page-item">
-                            <a class="page-link" href="{{ url_for('courses.index', page=page_num, search=request.args.get('search', ''), filter=request.args.get('filter', ''), sort=request.args.get('sort', '')) }}">{{ page_num }}</a>
+                            <a class="page-link" href="{{ url_for('courses.index', page=page_num, search=request.args.get('search', ''), filter=request.args.get('filter', ''), sort=request.args.get('sort', ''), exam=request.args.get('exam', '')) }}">{{ page_num }}</a>
                         </li>
                     {% endif %}
                 {% else %}
@@ -200,7 +246,7 @@
             
             {% if pagination.has_next %}
                 <li class="page-item">
-                    <a class="page-link" href="{{ url_for('courses.index', page=pagination.next_num, search=request.args.get('search', ''), filter=request.args.get('filter', ''), sort=request.args.get('sort', '')) }}">Next</a>
+                    <a class="page-link" href="{{ url_for('courses.index', page=pagination.next_num, search=request.args.get('search', ''), filter=request.args.get('filter', ''), sort=request.args.get('sort', ''), exam=request.args.get('exam', '')) }}">Next</a>
                 </li>
             {% else %}
                 <li class="page-item disabled">

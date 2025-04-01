@@ -1,12 +1,25 @@
 {% extends "layout.html" %}
 
-{% block title %}{{ course.title }} - LMS{% endblock %}
+{% block title %}{{ course.title }} - TestPrep Academy{% endblock %}
 
 {% block content %}
 <div class="row mb-4">
     <div class="col-md-8">
         <h2 class="display-6">{{ course.title }}</h2>
         <p class="lead">{{ course.code }}</p>
+        {% if course.exam_type == 'ielts' %}
+            <span class="badge bg-primary">IELTS Preparation</span>
+        {% elif course.exam_type == 'sat' %}
+            <span class="badge bg-info">SAT Preparation</span>
+        {% elif course.exam_type == 'nuet' %}
+            <span class="badge bg-success">NUET Preparation</span>
+        {% elif course.exam_type == 'uto' %}
+            <span class="badge bg-warning">UTO Preparation</span>
+        {% else %}
+            <span class="badge bg-secondary">General Course</span>
+        {% endif %}
+        <span class="badge bg-dark">{{ course.difficulty_level|title }}</span>
+        <span class="badge bg-secondary">{{ course.duration_weeks }} weeks</span>
     </div>
     <div class="col-md-4 text-md-end">
         {% if current_user.id == course.teacher_id or current_user.is_admin() %}
@@ -72,6 +85,33 @@
                 <div class="mb-3">
                     <h6 class="text-muted">Description</h6>
                     <p>{{ course.description }}</p>
+                </div>
+                
+                <div class="mb-3">
+                    <h6 class="text-muted">Exam Type</h6>
+                    <p><i class="fas fa-graduation-cap me-2"></i>
+                    {% if course.exam_type == 'ielts' %}
+                        IELTS Test Preparation
+                    {% elif course.exam_type == 'sat' %}
+                        SAT Test Preparation
+                    {% elif course.exam_type == 'nuet' %}
+                        NUET Test Preparation
+                    {% elif course.exam_type == 'uto' %}
+                        UTO Test Preparation
+                    {% else %}
+                        General Course
+                    {% endif %}
+                    </p>
+                </div>
+                
+                <div class="mb-3">
+                    <h6 class="text-muted">Difficulty Level</h6>
+                    <p><i class="fas fa-chart-line me-2"></i>{{ course.difficulty_level|title }}</p>
+                </div>
+                
+                <div class="mb-3">
+                    <h6 class="text-muted">Course Duration</h6>
+                    <p><i class="fas fa-hourglass-half me-2"></i>{{ course.duration_weeks }} weeks</p>
                 </div>
                 
                 <div class="mb-3">

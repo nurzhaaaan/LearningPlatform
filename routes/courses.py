@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, abort
 from flask_login import login_required, current_user
 from app import db
-from models import Course, User, Enrollment, Material, Assignment, Quiz, Role
+from models import Course, User, Enrollment, Material, Assignment, Quiz, Role, ExamType
 from forms import CourseForm, EnrollmentForm
 from sqlalchemy import desc
 import logging
@@ -24,6 +24,7 @@ def index():
     search = request.args.get('search', '')
     filter_option = request.args.get('filter', 'all')
     sort_option = request.args.get('sort', 'recent')
+    exam = request.args.get('exam', '')
     
     # Base query
     query = Course.query
@@ -36,7 +37,18 @@ def index():
             (Course.description.ilike(f'%{search}%'))
         )
     
-    # Apply filters
+    # Apply exam type filter
+    if exam:
+        if exam == 'ielts':
+            query = query.filter(Course.exam_type == ExamType.IELTS)
+        elif exam == 'sat':
+            query = query.filter(Course.exam_type == ExamType.SAT)
+        elif exam == 'nuet':
+            query = query.filter(Course.exam_type == ExamType.NUET)
+        elif exam == 'uto':
+            query = query.filter(Course.exam_type == ExamType.UTO)
+    
+    # Apply enrollment filters
     if filter_option == 'enrolled' and current_user.is_student():
         query = query.join(Enrollment).filter(
             Enrollment.student_id == current_user.id,
@@ -99,7 +111,10 @@ def index():
             'teacher_name': teacher_name,
             'student_count': student_count,
             'is_enrolled': is_enrolled,
-            'progress': progress
+            'progress': progress,
+            'exam_type': course.exam_type,
+            'difficulty_level': course.difficulty_level,
+            'duration_weeks': course.duration_weeks
         }
         courses_data.append(course_data)
     
@@ -125,13 +140,16 @@ def create():
                 code=form.code.data,
                 description=form.description.data,
                 teacher_id=current_user.id,
-                is_active=form.is_active.data
+                is_active=form.is_active.data,
+                exam_type=form.exam_type.data,
+                difficulty_level=form.difficulty_level.data,
+                duration_weeks=form.duration_weeks.data
             )
             
             db.session.add(course)
             db.session.commit()
             
-            flash(f'Course "{course.title}" has been created successfully!', 'success')
+            flash(f'Test prep course "{course.title}" has been created successfully!', 'success')
             return redirect(url_for('courses.view', course_id=course.id))
         except Exception as e:
             db.session.rollback()
@@ -209,9 +227,12 @@ def edit(course_id):
             course.code = form.code.data
             course.description = form.description.data
             course.is_active = form.is_active.data
+            course.exam_type = form.exam_type.data
+            course.difficulty_level = form.difficulty_level.data
+            course.duration_weeks = form.duration_weeks.data
             
             db.session.commit()
-            flash('Course updated successfully!', 'success')
+            flash('Test prep course updated successfully!', 'success')
             return redirect(url_for('courses.view', course_id=course.id))
         except Exception as e:
             db.session.rollback()
@@ -366,7 +387,10 @@ def enrolled():
             'progress': progress,
             'materials_count': materials_count,
             'assignments_count': assignments_count,
-            'quizzes_count': quizzes_count
+            'quizzes_count': quizzes_count,
+            'exam_type': course.exam_type,
+            'difficulty_level': course.difficulty_level,
+            'duration_weeks': course.duration_weeks
         }
         courses_data.append(course_data)
     

@@ -1,15 +1,15 @@
 {% extends "layout.html" %}
 
-{% block title %}My Learning - Enrolled Courses{% endblock %}
+{% block title %}My Test Prep Learning - TestPrep Academy{% endblock %}
 
 {% block content %}
 <div class="container">
     <div class="row mb-4">
         <div class="col-12">
             <h1 class="display-5 fw-bold">
-                <i class="fas fa-graduation-cap me-2"></i> My Learning
+                <i class="fas fa-graduation-cap me-2"></i> My Test Prep Learning
             </h1>
-            <p class="lead">Courses you're currently enrolled in.</p>
+            <p class="lead">Track your progress in test preparation courses for IELTS, SAT, NUET, and UTO exams.</p>
         </div>
     </div>
 
@@ -48,6 +48,23 @@
                         <div class="card-body">
                             <h5 class="card-title">{{ course.title }}</h5>
                             <p class="card-text">{{ course.description|truncate(100) }}</p>
+                            
+                            <!-- Exam type badges -->
+                            <div class="d-flex flex-wrap gap-1 mb-2">
+                                {% if course.exam_type == 'ielts' %}
+                                    <span class="badge bg-primary">IELTS</span>
+                                {% elif course.exam_type == 'sat' %}
+                                    <span class="badge bg-info">SAT</span>
+                                {% elif course.exam_type == 'nuet' %}
+                                    <span class="badge bg-success">NUET</span>
+                                {% elif course.exam_type == 'uto' %}
+                                    <span class="badge bg-warning">UTO</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">General</span>
+                                {% endif %}
+                                <span class="badge bg-dark">{{ course.difficulty_level|title }}</span>
+                                <span class="badge bg-secondary">{{ course.duration_weeks }} weeks</span>
+                            </div>
                             
                             <!-- Progress bar -->
                             <div class="mb-3">
@@ -136,10 +153,10 @@
         <div class="card bg-dark text-white mb-4">
             <div class="card-body text-center p-5">
                 <i class="fas fa-graduation-cap fa-5x mb-3"></i>
-                <h3 class="card-title">You're not enrolled in any courses yet</h3>
-                <p class="card-text">Browse our course catalog to find courses that interest you.</p>
+                <h3 class="card-title">You're not enrolled in any test prep courses yet</h3>
+                <p class="card-text">Browse our catalog of IELTS, SAT, NUET, and UTO preparation courses.</p>
                 <a href="{{ url_for('courses.index') }}" class="btn btn-primary btn-lg mt-3">
-                    <i class="fas fa-search me-1"></i> Browse Courses
+                    <i class="fas fa-search me-1"></i> Browse Test Prep Courses
                 </a>
             </div>
         </div>
@@ -147,9 +164,9 @@
 
     <!-- Explore more courses -->
     <div class="text-center mt-5 mb-4">
-        <h4>Looking for more courses?</h4>
+        <h4>Looking for more test preparation options?</h4>
         <a href="{{ url_for('courses.index') }}" class="btn btn-outline-primary">
-            <i class="fas fa-search me-1"></i> Explore All Courses
+            <i class="fas fa-search me-1"></i> Explore All Test Prep Courses
         </a>
     </div>
 </div>
